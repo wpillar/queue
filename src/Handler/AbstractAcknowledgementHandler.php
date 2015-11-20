@@ -55,7 +55,12 @@ abstract class AbstractAcknowledgementHandler
             foreach ($messages as $message) {
                 if ($message->isValid()) {
                     $result = call_user_func($worker, $message, $done);
-                    $this->acknowledge($message, $adapter, $result);
+
+                    // Support explicit message failure if the worker result for
+                    // the message is strictly false.
+                    if ($result !== false) {
+                        $this->acknowledge($message, $adapter, $result);
+                    }
                 }
 
                 if ($break) {

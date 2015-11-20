@@ -86,4 +86,21 @@ class BatchAcknowledgementHandlerTest extends TestCase
             }
         });
     }
+
+    public function testHandlerShouldNotAcknowledgeIfMessageResultIsFalse()
+    {
+        $handler = $this->handler;
+
+        $this->messageA->shouldReceive('isValid')->once()->andReturn(true);
+        $this->messageB->shouldReceive('isValid')->once()->andReturn(true);
+        $this->messageC->shouldReceive('isValid')->once()->andReturn(true);
+
+        $this->adapter->shouldReceive('acknowledge')->once()->with([$this->messageA, $this->messageC]);
+
+        $handler($this->messages, $this->adapter, function ($msg) {
+            if ($msg === $this->messageB) {
+                return false;
+            }
+        });
+    }
 }

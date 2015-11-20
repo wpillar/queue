@@ -94,4 +94,23 @@ class EagerAcknowledgementHandlerTest extends TestCase
             }
         });
     }
+
+    public function testHandlerShouldNotAcknowledgeIfMessageResultIsFalse()
+    {
+        $handler = $this->handler;
+
+        $this->messageA->shouldReceive('isValid')->once()->andReturn(true);
+        $this->messageB->shouldReceive('isValid')->once()->andReturn(true);
+        $this->messageC->shouldReceive('isValid')->once()->andReturn(true);
+
+        // @see https://github.com/padraic/mockery/issues/331
+        $this->adapter->shouldReceive('acknowledge')->once()->with(m::mustBe([$this->messageA]));
+        $this->adapter->shouldReceive('acknowledge')->once()->with(m::mustBe([$this->messageC]));
+
+        $handler($this->messages, $this->adapter, function ($msg) {
+            if ($msg === $this->messageB) {
+                return false;
+            }
+        });
+    }
 }
